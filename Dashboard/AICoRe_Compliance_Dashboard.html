@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regulatory Compliance Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F4F5F9;--surface:#FFFFFF;--surface2:#F0F2F7;--surface3:#E5E8F0;
+  --border:#D8DCE8;--border-light:#C8CDDB;
+  --text:#1A1D2E;--text-muted:#52596E;--text-dim:#8892A8;
+  --red:#C0272D;--red-bg:rgba(192,39,45,.07);--red-border:rgba(192,39,45,.22);
+  --orange:#C05A00;--orange-bg:rgba(192,90,0,.07);--orange-border:rgba(192,90,0,.22);
+  --yellow:#8A7200;--yellow-bg:rgba(138,114,0,.07);
+  --green:#1A7A4A;--green-bg:rgba(26,122,74,.07);--green-border:rgba(26,122,74,.22);
+  --blue:#1D50C0;--blue-bg:rgba(29,80,192,.07);--blue-border:rgba(29,80,192,.22);
+  --teal:#0070A0;--teal-bg:rgba(0,112,160,.07);
+  --purple:#5C35B0;--purple-bg:rgba(92,53,176,.07);
+  --health-accent:#C0272D;--edu-accent:#0070A0;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── Top Nav ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;height:56px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-right:40px;display:flex;align-items:center;gap:10px}
+.topbar-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+.domain-tabs{display:flex;gap:0;height:100%}
+.domain-tab{padding:0 24px;height:100%;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px}
+.domain-tab:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.domain-tab.active-health{color:var(--red);border-bottom-color:var(--red);background:var(--red-bg)}
+.domain-tab.active-edu{color:var(--teal);border-bottom-color:var(--teal);background:var(--teal-bg)}
+.topbar-right{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+
+/* ── Alert Banner ── */
+.alert-banner{padding:12px 32px;display:flex;align-items:center;gap:12px;font-size:13px;border-bottom:1px solid}
+.alert-banner.critical{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+.alert-banner.warning{background:var(--orange-bg);border-color:var(--orange-border);color:var(--orange)}
+.alert-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.alert-banner.critical .alert-icon{background:var(--red);color:#fff}
+.alert-banner.warning .alert-icon{background:var(--orange);color:#fff}
+.alert-text{flex:1}
+.alert-text strong{font-weight:600}
+.alert-link{margin-left:auto;font-size:12px;opacity:.7;white-space:nowrap}
+
+/* ── Sub Navigation ── */
+.subnav{padding:0 32px;background:var(--surface);border-bottom:2px solid var(--border);display:flex;gap:0}
+.subnav-tab{padding:12px 20px;font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.2px}
+.subnav-tab:hover{color:var(--text)}
+.subnav-tab.active{color:var(--text);border-bottom-color:var(--text)}
+
+/* ── Main Content ── */
+.main{padding:24px 32px 60px;max-width:1400px}
+
+/* ── Stat Cards ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.red::before{background:var(--red)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.teal::before{background:var(--teal)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:500}
+.stat-value{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
+.stat-value.text-red{color:var(--red)}
+.stat-value.text-orange{color:var(--orange)}
+.stat-value.text-green{color:var(--green)}
+.stat-value.text-blue{color:var(--blue)}
+.stat-value.text-teal{color:var(--teal)}
+.stat-sub{font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--mono)}
+
+/* ── Panels ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.panel-title{font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title .tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--mono)}
+
+/* ── Progress Bars ── */
+.progress-item{margin-bottom:14px}
+.progress-item:last-child{margin-bottom:0}
+.progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.progress-label{font-size:12px;color:var(--text-muted)}
+.progress-val{font-family:var(--mono);font-size:12px;font-weight:600}
+.progress-track{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.progress-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.progress-fill.red{background:var(--red)}
+.progress-fill.orange{background:var(--orange)}
+.progress-fill.green{background:var(--green)}
+.progress-fill.blue{background:var(--blue)}
+.progress-fill.teal{background:var(--teal)}
+
+/* ── Field Cards ── */
+.field-card{display:flex;align-items:center;padding:10px 14px;background:var(--surface);border-radius:8px;margin-bottom:8px;border:1px solid var(--border);gap:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.field-card:last-child{margin-bottom:0}
+.field-name{font-size:12px;font-weight:500;flex:1;min-width:0}
+.field-badge{font-size:10px;padding:3px 10px;border-radius:4px;font-weight:600;font-family:var(--mono);white-space:nowrap;letter-spacing:.3px}
+.badge-critical{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.badge-high{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-border)}
+.badge-medium{background:rgba(138,114,0,.07);color:var(--yellow);border:1px solid rgba(138,114,0,.25)}
+.badge-low{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.badge-info{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.field-score{font-family:var(--mono);font-size:12px;font-weight:600;width:52px;text-align:right}
+.field-art{font-size:11px;color:var(--text-dim);width:50px;text-align:right}
+
+/* ── Donut Chart ── */
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut{width:120px;height:120px;border-radius:50%;position:relative;flex-shrink:0}
+.donut-center{position:absolute;inset:20px;border-radius:50%;background:#FFFFFF;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-center .num{font-family:var(--mono);font-size:22px;font-weight:700}
+.donut-center .lbl{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── Verdict ── */
+.verdict-box{display:flex;align-items:center;gap:24px;padding:24px;border-radius:10px;margin-bottom:16px}
+.verdict-box.fail{background:var(--red-bg);border:1px solid var(--red-border)}
+.verdict-box.warn{background:var(--orange-bg);border:1px solid var(--orange-border)}
+.verdict-stamp{font-family:var(--mono);font-weight:700;font-size:22px;letter-spacing:2px;text-transform:uppercase;line-height:1.1}
+.verdict-box.fail .verdict-stamp{color:var(--red)}
+.verdict-box.warn .verdict-stamp{color:var(--orange)}
+.verdict-meta{font-size:13px;color:var(--text-muted);line-height:1.5}
+.verdict-meta strong{color:var(--text);font-weight:600}
+
+/* ── Compound Risk ── */
+.risk-row{display:flex;align-items:stretch;gap:12px;margin-bottom:12px}
+.risk-severity{width:4px;border-radius:2px;flex-shrink:0}
+.risk-severity.critical{background:var(--red)}
+.risk-severity.high{background:var(--orange)}
+.risk-content{flex:1;padding:14px 16px;background:var(--surface);border-radius:8px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.risk-title{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.risk-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+.risk-regs{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:6px}
+
+/* ── Roadmap ── */
+.roadmap-phase{margin-bottom:20px}
+.phase-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:6px 12px;border-radius:6px;display:inline-block}
+.phase-title.immediate{background:var(--red-bg);color:var(--red)}
+.phase-title.short{background:var(--orange-bg);color:var(--orange)}
+.phase-title.medium{background:var(--blue-bg);color:var(--blue)}
+.roadmap-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.roadmap-item:last-child{border-bottom:none}
+.roadmap-num{font-family:var(--mono);font-size:11px;font-weight:700;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface3);color:var(--text);border:1px solid var(--border)}
+.roadmap-text{font-size:12px;line-height:1.5;flex:1}
+.roadmap-text strong{color:var(--text);font-weight:600}
+.roadmap-reg{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:2px}
+
+/* ── Table ── */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:700;border-bottom:2px solid var(--border);background:var(--surface2)}
+.data-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text-muted)}
+.data-table td:first-child{color:var(--text);font-weight:500}
+.data-table tr:hover td{background:rgba(0,0,0,.03)}
+.data-table .mono{font-family:var(--mono);font-weight:600}
+
+/* ── Confusion Matrix ── */
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:2px;max-width:280px}
+.matrix-cell{padding:12px;text-align:center;border-radius:6px;font-family:var(--mono);font-weight:600;font-size:14px}
+.matrix-cell .label{font-size:9px;font-weight:400;display:block;margin-top:4px;letter-spacing:.5px;text-transform:uppercase;font-family:var(--sans)}
+.matrix-cell.tn{background:var(--green-bg);color:var(--green)}
+.matrix-cell.fp{background:var(--orange-bg);color:var(--orange)}
+.matrix-cell.fn{background:var(--red-bg);color:var(--red)}
+.matrix-cell.tp{background:var(--green-bg);color:var(--green)}
+
+/* ── Utility ── */
+.hidden{display:none!important}
+.mb-16{margin-bottom:16px}
+.mb-24{margin-bottom:24px}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.full-width{grid-column:1/-1}
+.fade-in{animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Print ── */
+@media print{
+  body{background:#fff;color:#111}
+  .topbar,.subnav,.alert-banner{position:static}
+  .panel,.stat-card{border-color:#ddd;break-inside:avoid}
+  .stat-value,.verdict-stamp{color:#111!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ TOP BAR ═══════ -->
+<div class="topbar">
+  <div class="topbar-logo"><span class="dot"></span>COMPLIANCE GATE</div>
+  <div class="domain-tabs">
+    <div class="domain-tab active-health" onclick="switchDomain('health')" id="tab-health">Healthcare</div>
+    <div class="domain-tab" onclick="switchDomain('edu')" id="tab-edu">Education</div>
+  </div>
+  <div class="topbar-right">Regulatory Compliance Assessment</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- ═══════ HEALTHCARE DOMAIN ═══════════════ -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="domain-health">
+
+<div class="alert-banner critical">
+  <div class="alert-icon">!</div>
+  <div class="alert-text"><strong>Deployment blocked &mdash; 2 critical &amp; 3 high-severity compliance violations detected.</strong> Art. 9 (special category data), Art. 32 (security), Art. 14 (human oversight). Resolve critical issues before model training.</div>
+  <div class="alert-link">View full report &rarr;</div>
+</div>
+
+<div class="subnav" id="subnav-health">
+  <div class="subnav-tab active" onclick="switchSub('health','overview')">Overview</div>
+  <div class="subnav-tab" onclick="switchSub('health','data')">Data Compliance</div>
+  <div class="subnav-tab" onclick="switchSub('health','model')">Model Compliance</div>
+  <div class="subnav-tab" onclick="switchSub('health','mapping')">Regulatory Mapping</div>
+  <div class="subnav-tab" onclick="switchSub('health','risks')">Compounding Risks</div>
+  <div class="subnav-tab" onclick="switchSub('health','guidance')">Guidance</div>
+  <div class="subnav-tab" onclick="switchSub('health','roadmap')">Roadmap</div>
+</div>
+
+<!-- ── Health: Overview ── -->
+<div class="main fade-in" id="health-overview">
+  <div class="stat-row">
+    <div class="stat-card red"><div class="stat-label">GDPR Score</div><div class="stat-value text-red">44.1%</div><div class="stat-sub">83 / 188 pts</div></div>
+    <div class="stat-card red"><div class="stat-label">Critical Violations</div><div class="stat-value text-red">3</div><div class="stat-sub">Block deployment</div></div>
+    <div class="stat-card orange"><div class="stat-label">Warnings</div><div class="stat-value text-orange">4</div><div class="stat-sub">Require review</div></div>
+    <div class="stat-card purple"><div class="stat-label">Special Category Fields</div><div class="stat-value text-red">8</div><div class="stat-sub">Art. 9 sensitive</div></div>
+    <div class="stat-card blue"><div class="stat-label">Dataset Size</div><div class="stat-value">5,000</div><div class="stat-sub">64 variables</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Framework Compliance Scores</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">GDPR (Data Compliance)</span><span class="progress-val text-red">44.1%</span></div><div class="progress-track"><div class="progress-fill red" style="width:44.1%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">EU AI Act (Model Compliance)</span><span class="progress-val text-red">18%</span></div><div class="progress-track"><div class="progress-fill red" style="width:18%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Combined Readiness</span><span class="progress-val text-red">31%</span></div><div class="progress-track"><div class="progress-fill red" style="width:31%"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Composite Score</div>
+      <div class="verdict-box fail">
+        <div>
+          <div class="verdict-stamp">NOT<br>DEPLOYABLE</div>
+        </div>
+        <div class="verdict-meta">
+          <strong>2 critical &middot; 3 high &middot; 2 medium risks</strong><br>
+          Cross-domain synthesis reveals compounding violations across GDPR and EU AI Act. Significant remediation required before clinical deployment.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Field-Level GDPR Classification <span class="tag badge-critical">4 QI categories</span></div>
+      <div class="field-card"><div class="field-name">age (Age / Date of Birth)</div><div class="field-badge badge-critical">Special Category</div><div class="field-art">Art. 9</div><div class="field-score text-orange">46.8%</div></div>
+      <div class="field-card"><div class="field-name">gender (Sex / Gender)</div><div class="field-badge badge-critical">Special Category</div><div class="field-art">Art. 9</div><div class="field-score text-red">40.0%</div></div>
+      <div class="field-card"><div class="field-name">primary_diagnosis (ICD Codes)</div><div class="field-badge badge-critical">Special Category</div><div class="field-art">Art. 9</div><div class="field-score text-red">34.7%</div></div>
+      <div class="field-card"><div class="field-name">num_prior_admissions</div><div class="field-badge badge-high">High Risk</div><div class="field-art">Art. 5</div><div class="field-score text-orange">55.3%</div></div>
+      <div class="field-card"><div class="field-name">num_medications</div><div class="field-badge badge-high">High Risk</div><div class="field-art">Art. 5</div><div class="field-score text-orange">--</div></div>
+      <div class="field-card"><div class="field-name">time_in_hospital</div><div class="field-badge badge-medium">Low Risk</div><div class="field-art">Art. 5</div><div class="field-score">--</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Risk Level Distribution</div>
+      <div class="donut-wrap">
+        <div class="donut" style="background:conic-gradient(var(--red) 0deg 180deg, var(--orange) 180deg 290deg, var(--yellow) 290deg 330deg, var(--green) 330deg 360deg)">
+          <div class="donut-center"><span class="num">80</span><span class="lbl">Questions</span></div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Critical &mdash; 39 questions (51.3%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Medium &mdash; 30 questions (36.7%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span>Low &mdash; 11 questions (9.1%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Compliant &mdash; 32 answers</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Risk Tags Detected</div>
+        <span class="field-badge badge-critical" style="margin-right:6px">HIGH_REIDENTIFICATION_RISK</span>
+        <span class="field-badge badge-high">SUBGROUP_UNDERREPRESENTATION</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Health: Data Compliance ── -->
+<div class="main fade-in hidden" id="health-data">
+  <div class="section-title">GDPR Data Compliance Assessment &mdash; Hospital Readmission Prediction</div>
+
+  <div class="stat-row">
+    <div class="stat-card red"><div class="stat-label">Overall Score</div><div class="stat-value text-red">44.1%</div><div class="stat-sub">83 / 188 points</div></div>
+    <div class="stat-card red"><div class="stat-label">Non-Compliant</div><div class="stat-value text-red">48</div><div class="stat-sub">of 80 answers (60%)</div></div>
+    <div class="stat-card orange"><div class="stat-label">QI Categories</div><div class="stat-value text-orange">4</div><div class="stat-sub">Quasi-identifiers</div></div>
+    <div class="stat-card purple"><div class="stat-label">Weighting</div><div class="stat-value">3:2:1</div><div class="stat-sub">High / Med / Low</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Compliance by Quasi-Identifier</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Number of Prior Admissions (26/47 &middot; 10/20 compliant)</span><span class="progress-val">55.3%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:55.3%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Age / Date of Birth (22/47 &middot; 8/20 compliant)</span><span class="progress-val">46.8%</span></div><div class="progress-track"><div class="progress-fill red" style="width:46.8%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Sex / Gender (18/45 &middot; 7/20 compliant)</span><span class="progress-val">40.0%</span></div><div class="progress-track"><div class="progress-fill red" style="width:40%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Diagnosis Codes / ICD (17/49 &middot; 7/20 compliant)</span><span class="progress-val text-red">34.7%</span></div><div class="progress-track"><div class="progress-fill red" style="width:34.7%"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Compliance by Criticality Level</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">High (weight=3) &mdash; 39 questions (20 compliant, 19 non-compliant &middot; 60/117)</span><span class="progress-val">51.3%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:51.3%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Medium (weight=2) &mdash; 30 questions (11 compliant, 19 non-compliant &middot; 22/60)</span><span class="progress-val text-red">36.7%</span></div><div class="progress-track"><div class="progress-fill red" style="width:36.7%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Low (weight=1) &mdash; 11 questions (1 compliant, 10 non-compliant &middot; 1/11)</span><span class="progress-val text-red">9.1%</span></div><div class="progress-track"><div class="progress-fill red" style="width:9.1%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title">Key Data Compliance Issues</div>
+    <div class="field-card"><div class="field-badge badge-critical">CRITICAL</div><div class="field-name">High re-identification risk: quasi-identifiers (age, gender, diagnosis) enable patient linkage in longitudinal data</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">CRITICAL</div><div class="field-name">No documented retention policy for 10-year longitudinal data with minute-level granularity (Art. 5(1)(e))</div></div>
+    <div class="field-card"><div class="field-badge badge-high">HIGH</div><div class="field-name">No evidence of pseudonymization or anonymization measures (Art. 32)</div></div>
+    <div class="field-card"><div class="field-badge badge-high">HIGH</div><div class="field-name">No transparency documentation: privacy notices, consent forms absent (Art. 12-14)</div></div>
+    <div class="field-card"><div class="field-badge badge-high">HIGH</div><div class="field-name">Subgroup underrepresentation detected across demographic groups</div></div>
+    <div class="field-card"><div class="field-badge badge-medium">MEDIUM</div><div class="field-name">Data minimization gaps: variables with limited predictive relevance retained (Art. 5(1)(c))</div></div>
+  </div>
+</div>
+
+<!-- ── Health: Model Compliance ── -->
+<div class="main fade-in hidden" id="health-model">
+  <div class="section-title">EU AI Act Model Compliance &mdash; Random Forest Classifier</div>
+
+  <div class="stat-row">
+    <div class="stat-card red"><div class="stat-label">AI Act Classification</div><div class="stat-value text-red" style="font-size:18px">HIGH-RISK</div><div class="stat-sub">Annex III &mdash; Healthcare</div></div>
+    <div class="stat-card orange"><div class="stat-label">Accuracy</div><div class="stat-value text-orange">61.3%</div><div class="stat-sub">Insufficient for clinical use</div></div>
+    <div class="stat-card red"><div class="stat-label">False Negative Rate</div><div class="stat-value text-red">49.8%</div><div class="stat-sub">1,137 patients missed</div></div>
+    <div class="stat-card orange"><div class="stat-label">Fairness Gap</div><div class="stat-value text-orange">2.35&times;</div><div class="stat-sub">Worst subgroup ratio</div></div>
+    <div class="stat-card blue"><div class="stat-label">F1 / Recall</div><div class="stat-value">0.54</div><div class="stat-sub">F1=0.54 &middot; Recall=0.50</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Model Performance Comparison</div>
+      <table class="data-table">
+        <tr><th>Metric</th><th>Logistic Reg.</th><th>Random Forest</th></tr>
+        <tr><td>Accuracy</td><td class="mono">0.6174</td><td class="mono">0.6128</td></tr>
+        <tr><td>Precision</td><td class="mono">0.6207</td><td class="mono">0.5890</td></tr>
+        <tr><td>Recall</td><td class="mono">0.4159</td><td class="mono" style="color:var(--green)">0.5018</td></tr>
+        <tr><td>F1 Score</td><td class="mono">0.4980</td><td class="mono" style="color:var(--green)">0.5419</td></tr>
+        <tr><td style="color:var(--red);font-weight:600">False Neg. Rate</td><td class="mono">--</td><td class="mono" style="color:var(--red);font-weight:700">49.8%</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Confusion Matrix (Random Forest)</div>
+      <div style="display:flex;gap:20px;align-items:center">
+        <div class="matrix">
+          <div class="matrix-cell tn">1,919<span class="label">True Neg</span></div>
+          <div class="matrix-cell fp">799<span class="label">False Pos</span></div>
+          <div class="matrix-cell fn">1,137<span class="label">False Neg</span></div>
+          <div class="matrix-cell tp">1,145<span class="label">True Pos</span></div>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7">
+          <div><span style="color:var(--red);font-weight:600">49.8% FNR</span> &mdash; nearly half of at-risk patients undetected</div>
+          <div style="margin-top:8px"><span style="color:var(--orange);font-weight:600">29.4% FPR</span> &mdash; unnecessary resource allocation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title">EU AI Act Obligations Triggered</div>
+    <div class="field-card"><div class="field-badge badge-critical">FAIL</div><div class="field-name">Art. 14 &mdash; Human Oversight: No human-in-the-loop mechanism documented</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">FAIL</div><div class="field-name">Art. 15 &mdash; Accuracy: 61% accuracy, 49.8% FNR insufficient for patient safety</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">FAIL</div><div class="field-name">Annex IV &mdash; Technical Documentation: Not yet implemented</div></div>
+    <div class="field-card"><div class="field-badge badge-high">WARN</div><div class="field-name">Art. 10 &mdash; Data Governance: Training data bias, no documentation</div></div>
+    <div class="field-card"><div class="field-badge badge-high">WARN</div><div class="field-name">Art. 13 &mdash; Transparency: No model documentation for clinicians</div></div>
+    <div class="field-card"><div class="field-badge badge-high">WARN</div><div class="field-name">Art. 10(2)(f) &mdash; Bias: Performance disparities across race, gender, age</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">SHAP Feature Importance (Top 4)</div>
+    <div class="progress-item"><div class="progress-header"><span class="progress-label">num_medications</span><span class="progress-val" style="color:var(--green)">Clinically relevant</span></div><div class="progress-track"><div class="progress-fill green" style="width:85%"></div></div></div>
+    <div class="progress-item"><div class="progress-header"><span class="progress-label">time_in_hospital</span><span class="progress-val" style="color:var(--green)">Clinically relevant</span></div><div class="progress-track"><div class="progress-fill green" style="width:72%"></div></div></div>
+    <div class="progress-item"><div class="progress-header"><span class="progress-label">num_prior_inpatient</span><span class="progress-val" style="color:var(--green)">Clinically relevant</span></div><div class="progress-track"><div class="progress-fill green" style="width:65%"></div></div></div>
+    <div class="progress-item"><div class="progress-header"><span class="progress-label">number_diagnoses</span><span class="progress-val" style="color:var(--green)">Clinically relevant</span></div><div class="progress-track"><div class="progress-fill green" style="width:58%"></div></div></div>
+  </div>
+</div>
+
+<!-- ── Health: Regulatory Mapping ── -->
+<div class="main fade-in hidden" id="health-mapping">
+  <div class="section-title">Quasi-Identifier &rarr; GDPR Article Mapping</div>
+  <div class="panel mb-16">
+    <table class="data-table">
+      <tr><th>Quasi-Identifier</th><th>Risk Tags</th><th>GDPR Articles</th><th>Specific Concern</th></tr>
+      <tr><td>Age / Date of Birth</td><td><span class="field-badge badge-critical" style="font-size:9px">HIGH_REIDENTIFICATION</span></td><td class="mono">Art. 5(1)(c), Art. 6, Art. 32</td><td>Age brackets combined with diagnosis codes enable re-identification in longitudinal data. No documented lawful basis. No security measures.</td></tr>
+      <tr><td>Sex / Gender</td><td><span class="field-badge badge-critical" style="font-size:9px">HIGH_REIDENTIFICATION</span> <span class="field-badge badge-high" style="font-size:9px">UNDERREPRESENTATION</span></td><td class="mono">Art. 5(1)(c), Art. 9, Art. 12-14</td><td>Gender linked to health data = special category data. Underrepresentation of certain groups. No transparency documentation.</td></tr>
+      <tr><td>Diagnosis Codes (ICD)</td><td><span class="field-badge badge-critical" style="font-size:9px">HIGH_REIDENTIFICATION</span></td><td class="mono">Art. 5(1)(c), Art. 5(1)(e), Art. 9, Art. 32</td><td>Rare diagnoses drastically reduce anonymity. Long diagnostic histories are identifying. Special category health data. Lowest compliance (34.7%).</td></tr>
+      <tr><td>Num. Prior Admissions</td><td><span class="field-badge badge-critical" style="font-size:9px">HIGH_REIDENTIFICATION</span></td><td class="mono">Art. 5(1)(c), Art. 5(1)(e)</td><td>Unusual utilization patterns are identifying. Longitudinal traceability concern. Highest compliance (55.3%) but still below threshold.</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Model Risk &rarr; EU AI Act Article Mapping</div>
+  <div class="panel mb-16">
+    <table class="data-table">
+      <tr><th>Model Risk</th><th>Finding</th><th>EU AI Act</th><th>Obligation</th></tr>
+      <tr><td>High-Risk Classification</td><td>Healthcare AI for clinical decisions</td><td class="mono">Annex III (5a)</td><td>Must comply with all Chapter 2 requirements (Art. 8-15)</td></tr>
+      <tr><td>Bias &amp; Discrimination</td><td>Performance disparities across race, gender, age</td><td class="mono">Art. 10(2)(f), Recital 44</td><td>Training data must be examined for biases. Detection and correction required.</td></tr>
+      <tr><td>Transparency</td><td>No model documentation, no explainability for clinicians</td><td class="mono">Art. 13</td><td>High-risk AI must be sufficiently transparent for users to interpret outputs</td></tr>
+      <tr><td>Human Oversight</td><td>No human-in-the-loop mechanism documented</td><td class="mono">Art. 14</td><td>Measures enabling human oversight during use, including ability to override</td></tr>
+      <tr><td>Accuracy &amp; Robustness</td><td>61% accuracy, 49.8% FNR, no monitoring plan</td><td class="mono">Art. 15</td><td>Must achieve appropriate levels of accuracy, robustness, cybersecurity</td></tr>
+      <tr><td>Data Governance</td><td>Training data quality issues, no documentation</td><td class="mono">Art. 10</td><td>Training/validation/testing datasets must meet quality criteria</td></tr>
+      <tr><td>Technical Documentation</td><td>Not yet implemented</td><td class="mono">Annex IV</td><td>Detailed technical documentation required before placing on market</td></tr>
+      <tr><td>Fundamental Rights</td><td>49.8% of at-risk patients missed &rarr; safety</td><td class="mono">Art. 9 (Risk Mgmt)</td><td>Continuous risk management system required throughout lifecycle</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Cross-Domain Compounding Risk Matrix</div>
+  <div class="panel">
+    <table class="data-table">
+      <tr><th>Risk Domain</th><th>Data Finding</th><th>Model Finding</th><th>Severity</th></tr>
+      <tr><td>Re-identification</td><td>HIGH_REIDENTIFICATION_RISK; QIs enable linkage</td><td>Model uses sensitive attributes as features</td><td><span class="field-badge badge-critical">CRITICAL</span></td></tr>
+      <tr><td>Bias &amp; Fairness</td><td>Subgroup underrepresentation in dataset</td><td>Performance disparities across demographic groups</td><td><span class="field-badge badge-high">HIGH</span></td></tr>
+      <tr><td>Patient Safety</td><td>No documented safeguards for data integrity</td><td>49.8% FNR &mdash; nearly half of at-risk patients missed</td><td><span class="field-badge badge-critical">CRITICAL</span></td></tr>
+      <tr><td>Transparency</td><td>No privacy notices or consent documentation</td><td>SHAP provides explainability but no end-user docs</td><td><span class="field-badge badge-high">HIGH</span></td></tr>
+      <tr><td>Data Minimization</td><td>Non-essential variables retained</td><td>SHAP confirms some features have minimal predictive value</td><td><span class="field-badge badge-medium">MEDIUM</span></td></tr>
+      <tr><td>Retention</td><td>10-year longitudinal data, no retention policy</td><td>Model trained on full temporal span without justification</td><td><span class="field-badge badge-high">HIGH</span></td></tr>
+      <tr><td>Documentation</td><td>GDPR score below 50% across all QIs</td><td>EU AI Act Annex IV: not yet implemented</td><td><span class="field-badge badge-high">HIGH</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Health: Guidance ── -->
+<div class="main fade-in hidden" id="health-guidance">
+  <div class="section-title">GDPR Compliance Guidance</div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title immediate" style="margin:0">Priority 1 &mdash; Critical (Immediate)</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 32 &mdash; Security of Processing</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> No documented technical or organizational measures for any quasi-identifier</div>
+      <div class="field-card"><div class="field-name">Implement encryption at rest and in transit for all patient data</div></div>
+      <div class="field-card"><div class="field-name">Implement access control mechanisms with audit logging</div></div>
+      <div class="field-card"><div class="field-name">Apply pseudonymization of quasi-identifiers where possible</div></div>
+      <div class="field-card"><div class="field-name">Conduct regular security assessments</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 35 &mdash; Data Protection Impact Assessment (DPIA)</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> No DPIA performed despite processing special category health data at scale</div>
+      <div class="field-card"><div class="field-name">DPIA is mandatory: health data (Art. 9), systematic profiling, vulnerable persons (patients), large-scale longitudinal</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 5(1)(e) &mdash; Storage Limitation</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> 10-year longitudinal data with minute-level granularity, no documented retention policy</div>
+      <div class="field-card"><div class="field-name">Define and document data retention periods with justification</div></div>
+      <div class="field-card"><div class="field-name">Implement temporal coarsening (month/quarter instead of minute-level)</div></div>
+      <div class="field-card"><div class="field-name">Establish automated data deletion/anonymization schedules</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title short" style="margin:0">Priority 2 &mdash; High</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 9 &mdash; Special Category Data</div>
+      <div class="field-card"><div class="field-name">Document lawful basis under Art. 9(2) (public interest, scientific research)</div></div>
+      <div class="field-card"><div class="field-name">Apply rare-condition suppression for diagnosis codes</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 5(1)(c) &mdash; Data Minimization</div>
+      <div class="field-card"><div class="field-name">Remove variables with low feature relevance that carry high re-identification risk</div></div>
+      <div class="field-card"><div class="field-name">Document necessity justification for each retained variable</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 12-14 &mdash; Transparency</div>
+      <div class="field-card"><div class="field-name">Prepare privacy notice describing data processing activities</div></div>
+      <div class="field-card"><div class="field-name">Document data controller and processor roles</div></div>
+      <div class="field-card"><div class="field-name">Inform data subjects about automated decision-making (Art. 22)</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-24">
+    <div class="panel-title"><span class="phase-title medium" style="margin:0">Priority 3 &mdash; Medium</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 6 &mdash; Lawful Basis &amp; Art. 25 &mdash; Data Protection by Design</div>
+      <div class="field-card"><div class="field-name">Identify and document appropriate legal basis (consent, public interest, legitimate interest)</div></div>
+      <div class="field-card"><div class="field-name">Integrate k-anonymity, differential privacy, data generalization</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">EU AI Act Compliance Guidance</div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title immediate" style="margin:0">Priority 1 &mdash; Critical</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Annex III + Art. 6 &mdash; High-Risk Classification</div>
+      <div class="field-card"><div class="field-name">System is medical AI (Annex III, 5a). MUST comply with ALL Art. 8-15 requirements before deployment.</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 14 &mdash; Human Oversight</div>
+      <div class="field-card"><div class="field-name">Design system so clinicians can override or disregard AI predictions</div></div>
+      <div class="field-card"><div class="field-name">Implement alert thresholds for low-confidence predictions</div></div>
+      <div class="field-card"><div class="field-name">Document decision authority: AI recommendation vs. clinical judgment</div></div>
+      <div class="field-card"><div class="field-name">Provide mechanism to interrupt or stop the system</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 15 &mdash; Accuracy, Robustness, Cybersecurity</div>
+      <div class="field-card"><div class="field-name">Improve model performance (61% accuracy insufficient for clinical deployment)</div></div>
+      <div class="field-card"><div class="field-name">Implement continuous performance monitoring + drift detection</div></div>
+      <div class="field-card"><div class="field-name">Document acceptable performance thresholds</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title short" style="margin:0">Priority 2 &mdash; High</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 10 &mdash; Data and Data Governance</div>
+      <div class="field-card"><div class="field-name">Document training, validation, and testing data characteristics</div></div>
+      <div class="field-card"><div class="field-name">Address bias through resampling, reweighting, or fairness-aware training</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Art. 13 &mdash; Transparency and Information to Users</div>
+      <div class="field-card"><div class="field-name">Create instructions for use including intended purpose and limitations</div></div>
+      <div class="field-card"><div class="field-name">Extend SHAP explainability to user-facing outputs</div></div>
+      <div class="field-card"><div class="field-name">Communicate known biases and error rates to clinicians</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Annex IV &mdash; Technical Documentation</div>
+      <div class="field-card"><div class="field-name">General description, development process, training data info, performance metrics per subgroup, risk management, post-market monitoring plan</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Sector-Specific Guidelines (Healthcare)</div>
+    <div class="field-card"><div class="field-badge badge-info">NOTE</div><div class="field-name">Health data processing requires explicit consent or public interest basis under Art. 9(2)</div></div>
+    <div class="field-card"><div class="field-badge badge-info">NOTE</div><div class="field-name">Clinical decision support systems may require validation under Medical Device Regulation (MDR 2017/745)</div></div>
+    <div class="field-card"><div class="field-badge badge-info">NOTE</div><div class="field-name">Patient data falls under enhanced protection &mdash; any breach has amplified consequences</div></div>
+    <div class="field-card"><div class="field-badge badge-info">NOTE</div><div class="field-name">Cross-border data transfers may apply if cloud infrastructure is used</div></div>
+  </div>
+</div>
+
+<!-- ── Health: Compounding Risks ── -->
+<div class="main fade-in hidden" id="health-risks">
+  <div class="section-title">Cross-Domain Compounding Risks &mdash; GDPR &times; EU AI Act</div>
+
+  <div class="risk-row"><div class="risk-severity critical"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-critical">CRITICAL</span> Privacy-Performance Paradox</div><div class="risk-desc">Quasi-identifiers (age, gender, diagnosis) have HIGH_REIDENTIFICATION_RISK. SHAP shows these same QIs are the most predictive features. Removing them for privacy reduces model performance; keeping them increases re-identification risk.</div><div class="risk-regs">GDPR Art. 5(1)(c) &times; EU AI Act Art. 10</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity critical"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-critical">CRITICAL</span> Safety-Oversight Deficit</div><div class="risk-desc">No documented security measures feed unprotected data into a model with 49.8% false negative rate and no human oversight mechanism. Unprotected data + unreliable model + no human check.</div><div class="risk-regs">GDPR Art. 32 &times; EU AI Act Art. 14, 15</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Bias Amplification</div><div class="risk-desc">SUBGROUP_UNDERREPRESENTATION detected in dataset. Model shows performance disparities across same underrepresented groups. Dataset imbalance directly causes model discrimination.</div><div class="risk-regs">GDPR Art. 9 &times; EU AI Act Art. 10(2)(f)</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Transparency Gap</div><div class="risk-desc">No documented privacy notices or DPIA. No model documentation or explainability for clinicians. Neither data nor model layer provides any transparency to data subjects or users.</div><div class="risk-regs">GDPR Art. 12-14, 35 &times; EU AI Act Art. 13</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Retention-Longitudinality Risk</div><div class="risk-desc">10-year longitudinal data with no retention policy. Model trained on full temporal span without necessity justification. Excessive retention amplifies re-identification risk AND model bias from historical patterns.</div><div class="risk-regs">GDPR Art. 5(1)(e) &times; EU AI Act Art. 10</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Documentation Deficit</div><div class="risk-desc">GDPR compliance score below 50% across all QI categories. EU AI Act Annex IV technical documentation not yet implemented. Neither data protection nor model governance layer has any formal documentation in place.</div><div class="risk-regs">GDPR Art. 12-14, 35 &times; EU AI Act Annex IV</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-medium">MEDIUM</span> Data Minimization Gap</div><div class="risk-desc">Variables not strictly necessary for readmission prediction are retained in the dataset. SHAP analysis confirms some features have minimal predictive value but carry re-identification risk. Non-essential data increases regulatory exposure without improving model utility.</div><div class="risk-regs">GDPR Art. 5(1)(c) &times; EU AI Act Art. 10</div></div></div>
+</div>
+
+<!-- ── Health: Roadmap ── -->
+<div class="main fade-in hidden" id="health-roadmap">
+  <div class="section-title">Risk Mitigation Roadmap &mdash; Healthcare</div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title immediate">Immediate &mdash; Before Deployment</div>
+    <div class="roadmap-item"><div class="roadmap-num">1</div><div class="roadmap-text"><strong>Perform Data Protection Impact Assessment (DPIA)</strong><div class="roadmap-reg">GDPR Art. 35 &mdash; Special category data at scale</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">2</div><div class="roadmap-text"><strong>Implement human-in-the-loop oversight mechanism</strong><div class="roadmap-reg">EU AI Act Art. 14 &mdash; No human oversight</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">3</div><div class="roadmap-text"><strong>Improve model performance (reduce 49.8% FNR)</strong><div class="roadmap-reg">EU AI Act Art. 15 &mdash; At-risk patients missed</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">4</div><div class="roadmap-text"><strong>Document lawful basis and data retention policy</strong><div class="roadmap-reg">GDPR Art. 6, 5(1)(e) &mdash; No legal basis, no retention policy</div></div></div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title short">Short-Term &mdash; 0-3 Months</div>
+    <div class="roadmap-item"><div class="roadmap-num">5</div><div class="roadmap-text"><strong>Apply pseudonymization to quasi-identifiers</strong><div class="roadmap-reg">GDPR Art. 32 &mdash; HIGH_REIDENTIFICATION_RISK</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">6</div><div class="roadmap-text"><strong>Conduct fairness audit and mitigate bias</strong><div class="roadmap-reg">EU AI Act Art. 10(2)(f) &mdash; Performance disparities</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">7</div><div class="roadmap-text"><strong>Create technical documentation per Annex IV</strong><div class="roadmap-reg">EU AI Act Annex IV &mdash; No documentation</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">8</div><div class="roadmap-text"><strong>Draft privacy notice and information documents</strong><div class="roadmap-reg">GDPR Art. 12-14 &mdash; No transparency</div></div></div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title medium">Medium-Term &mdash; 3-6 Months</div>
+    <div class="roadmap-item"><div class="roadmap-num">9</div><div class="roadmap-text"><strong>Remove low-utility, high-risk variables</strong><div class="roadmap-reg">GDPR Art. 5(1)(c) &mdash; Data minimization gaps</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">10</div><div class="roadmap-text"><strong>Implement k-anonymity / differential privacy</strong><div class="roadmap-reg">GDPR Art. 25, 32 &mdash; Re-identification risk</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">11</div><div class="roadmap-text"><strong>Set up continuous monitoring and drift detection</strong><div class="roadmap-reg">EU AI Act Art. 15 &mdash; Model degradation</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">12</div><div class="roadmap-text"><strong>Establish post-market surveillance plan</strong><div class="roadmap-reg">EU AI Act Art. 72 &mdash; Lifecycle compliance</div></div></div>
+  </div>
+</div>
+
+</div><!-- /domain-health -->
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- ═══════ EDUCATION DOMAIN ════════════════ -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="domain-edu" class="hidden">
+
+<div class="alert-banner warning">
+  <div class="alert-icon">!</div>
+  <div class="alert-text"><strong>Deployment not recommended &mdash; 2 critical &amp; 4 high-severity risks detected.</strong> All subjects are minors. Gender fairness gap (&Delta;=0.35) exceeds acceptable threshold. FERPA de-identification required.</div>
+  <div class="alert-link">View full report &rarr;</div>
+</div>
+
+<div class="subnav" id="subnav-edu">
+  <div class="subnav-tab active" onclick="switchSub('edu','overview')">Overview</div>
+  <div class="subnav-tab" onclick="switchSub('edu','data')">Data Compliance</div>
+  <div class="subnav-tab" onclick="switchSub('edu','model')">Model Compliance</div>
+  <div class="subnav-tab" onclick="switchSub('edu','mapping')">Regulatory Mapping</div>
+  <div class="subnav-tab" onclick="switchSub('edu','risks')">Compounding Risks</div>
+  <div class="subnav-tab" onclick="switchSub('edu','guidance')">Guidance</div>
+  <div class="subnav-tab" onclick="switchSub('edu','roadmap')">Roadmap</div>
+</div>
+
+<!-- ── Edu: Overview ── -->
+<div class="main fade-in" id="edu-overview">
+  <div class="stat-row">
+    <div class="stat-card orange"><div class="stat-label">FERPA Score (mat)</div><div class="stat-value text-orange">58.7%</div><div class="stat-sub">365 / 622 pts</div></div>
+    <div class="stat-card orange"><div class="stat-label">FERPA Score (por)</div><div class="stat-value text-orange">55.5%</div><div class="stat-sub">351 / 632 pts</div></div>
+    <div class="stat-card red"><div class="stat-label">Critical Risks</div><div class="stat-value text-red">2</div><div class="stat-sub">Gender + Minor vuln.</div></div>
+    <div class="stat-card teal"><div class="stat-label">Best Model R&sup2;</div><div class="stat-value text-teal">0.92</div><div class="stat-sub">XGBoost &middot; merged</div></div>
+    <div class="stat-card red"><div class="stat-label">Max Fairness Gap</div><div class="stat-value text-red">&Delta;0.35</div><div class="stat-sub">Gender (sex)</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Framework Compliance Scores</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">FERPA (student-mat)</span><span class="progress-val text-orange">58.7%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:58.7%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">FERPA (student-por)</span><span class="progress-val text-orange">55.5%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:55.5%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">NIST AI RMF (Fairness)</span><span class="progress-val text-red">35%</span></div><div class="progress-track"><div class="progress-fill red" style="width:35%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Combined Readiness</span><span class="progress-val text-orange">42%</span></div><div class="progress-track"><div class="progress-fill red" style="width:42%"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Composite Score</div>
+      <div class="verdict-box warn">
+        <div>
+          <div class="verdict-stamp">NOT<br>DEPLOYMENT<br>READY</div>
+        </div>
+        <div class="verdict-meta">
+          <strong>2 critical &middot; 4 high risks</strong><br>
+          Partially compliant. Strong accuracy (R&sup2;=0.92) undermined by significant fairness gaps across gender, geography, and family structure. All subjects are minors &mdash; enhanced protections required.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">QI Category Overview (student-mat) <span class="tag badge-info">9 categories</span></div>
+      <div class="field-card"><div class="field-name">Sex / Gender</div><div class="field-badge badge-critical">CRITICAL</div><div class="field-score text-red">10.9%</div></div>
+      <div class="field-card"><div class="field-name">Academic Performance</div><div class="field-badge badge-critical">CRITICAL</div><div class="field-score text-red">21.6%</div></div>
+      <div class="field-card"><div class="field-name">Age / Date of Birth</div><div class="field-badge badge-critical">CRITICAL</div><div class="field-score text-red">23.0%</div></div>
+      <div class="field-card"><div class="field-name">School / Institution</div><div class="field-badge badge-high">HIGH</div><div class="field-score text-orange">40.8%</div></div>
+      <div class="field-card"><div class="field-name">Parental Education</div><div class="field-badge badge-medium">MEDIUM</div><div class="field-score">71.4%</div></div>
+      <div class="field-card"><div class="field-name">Behavioral / Attendance</div><div class="field-badge badge-low">OK</div><div class="field-score" style="color:var(--green)">100%</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Risk Level Distribution</div>
+      <div class="donut-wrap">
+        <div class="donut" style="background:conic-gradient(var(--red) 0deg 120deg, var(--orange) 120deg 200deg, var(--yellow) 200deg 280deg, var(--green) 280deg 360deg)">
+          <div class="donut-center"><span class="num">9</span><span class="lbl">QI Cats</span></div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Critical &mdash; 3 categories</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>High &mdash; 1 category</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span>Medium &mdash; 3 categories</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Compliant &mdash; 2 categories</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Risk Tags &amp; Protections</div>
+        <span class="field-badge badge-critical" style="margin-right:6px">reidentification_risk</span>
+        <span class="field-badge badge-high" style="margin-right:6px">education_records_sensitive</span>
+        <span class="field-badge badge-critical">ALL SUBJECTS ARE MINORS</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edu: Data Compliance ── -->
+<div class="main fade-in hidden" id="edu-data">
+  <div class="section-title">FERPA / NIST AI RMF Data Compliance &mdash; Student Performance Prediction</div>
+
+  <div class="stat-row">
+    <div class="stat-card orange"><div class="stat-label">student-mat</div><div class="stat-value text-orange">58.7%</div><div class="stat-sub">365/622 &middot; 55/94 correct</div></div>
+    <div class="stat-card orange"><div class="stat-label">student-por</div><div class="stat-value text-orange">55.5%</div><div class="stat-sub">351/632 &middot; 49/92 correct</div></div>
+    <div class="stat-card blue"><div class="stat-label">QI Categories</div><div class="stat-value">9</div><div class="stat-sub">Quasi-identifiers</div></div>
+    <div class="stat-card purple"><div class="stat-label">Sensitive Columns</div><div class="stat-value">21</div><div class="stat-sub">5 categories</div></div>
+    <div class="stat-card red"><div class="stat-label">Weighting</div><div class="stat-value" style="font-size:20px">3&times; 2&times; 1&times;</div><div class="stat-sub">FERPA / NIST / Generic</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">student-mat &mdash; By Quasi-Identifier</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Behavioral / Attendance (11Q, 11 correct, 77/77)</span><span class="progress-val" style="color:var(--green)">100%</span></div><div class="progress-track"><div class="progress-fill green" style="width:100%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Socioeconomic (11Q, 9 correct, 65/70)</span><span class="progress-val" style="color:var(--green)">92.9%</span></div><div class="progress-track"><div class="progress-fill green" style="width:92.9%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Geographic (11Q, 8 correct, 60/77)</span><span class="progress-val">77.9%</span></div><div class="progress-track"><div class="progress-fill teal" style="width:77.9%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Family Structure (11Q, 7 correct, 53/74)</span><span class="progress-val">71.6%</span></div><div class="progress-track"><div class="progress-fill teal" style="width:71.6%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Parental Education (10Q, 7 correct, 45/63)</span><span class="progress-val">71.4%</span></div><div class="progress-track"><div class="progress-fill teal" style="width:71.4%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">School / Institution (11Q, 4 correct, 29/71)</span><span class="progress-val text-orange">40.8%</span></div><div class="progress-track"><div class="progress-fill red" style="width:40.8%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Age / Date of Birth (9Q, 4 correct, 14/61)</span><span class="progress-val text-red">23.0%</span></div><div class="progress-track"><div class="progress-fill red" style="width:23%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Academic Performance (11Q, 3 correct, 16/74)</span><span class="progress-val text-red">21.6%</span></div><div class="progress-track"><div class="progress-fill red" style="width:21.6%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Sex / Gender (9Q, 2 correct, 6/55)</span><span class="progress-val text-red">10.9%</span></div><div class="progress-track"><div class="progress-fill red" style="width:10.9%"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">student-por &mdash; By Quasi-Identifier</div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Behavioral / Attendance (9Q, 9 correct, 61/61)</span><span class="progress-val" style="color:var(--green)">100%</span></div><div class="progress-track"><div class="progress-fill green" style="width:100%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Sex / Gender (10Q, 8 correct, 50/58)</span><span class="progress-val" style="color:var(--green)">86.2%</span></div><div class="progress-track"><div class="progress-fill green" style="width:86.2%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Parental Education (9Q, 7 correct, 56/71)</span><span class="progress-val">78.9%</span></div><div class="progress-track"><div class="progress-fill teal" style="width:78.9%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Socioeconomic (10Q, 5 correct, 48/72)</span><span class="progress-val">66.7%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:66.7%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Geographic (11Q, 4 correct, 40/78)</span><span class="progress-val">51.3%</span></div><div class="progress-track"><div class="progress-fill orange" style="width:51.3%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Age / Date of Birth (10Q, 5 correct, 23/62)</span><span class="progress-val text-orange">37.1%</span></div><div class="progress-track"><div class="progress-fill red" style="width:37.1%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Family Structure (11Q, 3 correct, 29/82)</span><span class="progress-val text-red">35.4%</span></div><div class="progress-track"><div class="progress-fill red" style="width:35.4%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">Academic Performance (11Q, 6 correct, 26/76)</span><span class="progress-val text-red">34.2%</span></div><div class="progress-track"><div class="progress-fill red" style="width:34.2%"></div></div></div>
+      <div class="progress-item"><div class="progress-header"><span class="progress-label">School / Institution (11Q, 2 correct, 18/72)</span><span class="progress-val text-red">25.0%</span></div><div class="progress-track"><div class="progress-fill red" style="width:25%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title">Sensitive Attribute Categories (21 columns)</div>
+    <div class="field-card"><div class="field-badge badge-critical">FERPA</div><div class="field-name"><strong>Student Education Records</strong> &mdash; G1, G2, failures, study time, school support</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">FERPA</div><div class="field-name"><strong>Student Behavioral Records</strong> &mdash; absences, Dalc, Walc, goout, activities, romantic</div></div>
+    <div class="field-card"><div class="field-badge badge-high">FERPA</div><div class="field-name"><strong>Family / Guardian Information</strong> &mdash; famsize, Pstatus, guardian, Medu, Fedu, Mjob, Fjob</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">MINOR</div><div class="field-name"><strong>Minor / Age-Related Data</strong> &mdash; age (all subjects are minors)</div></div>
+    <div class="field-card"><div class="field-badge badge-high">FERPA</div><div class="field-name"><strong>Institutional Identifiers</strong> &mdash; school (narrows identification space)</div></div>
+  </div>
+</div>
+
+<!-- ── Edu: Model Compliance ── -->
+<div class="main fade-in hidden" id="edu-model">
+  <div class="section-title">NIST AI RMF Model Compliance &mdash; XGBoost Regressor (Merged Dataset)</div>
+
+  <div class="stat-row">
+    <div class="stat-card teal"><div class="stat-label">Best R&sup2;</div><div class="stat-value text-teal">0.92</div><div class="stat-sub">XGBoost &middot; merged</div></div>
+    <div class="stat-card teal"><div class="stat-label">Best MAE</div><div class="stat-value text-teal">0.85</div><div class="stat-sub">grade points</div></div>
+    <div class="stat-card red"><div class="stat-label">Gender Gap</div><div class="stat-value text-red">&Delta;0.35</div><div class="stat-sub">Female 0.97 vs Male 0.62</div></div>
+    <div class="stat-card orange"><div class="stat-label">Geographic Gap</div><div class="stat-value text-orange">&Delta;0.23</div><div class="stat-sub">Rural 0.99 vs Urban 0.76</div></div>
+    <div class="stat-card orange"><div class="stat-label">Family Gap</div><div class="stat-value text-orange">&Delta;0.19</div><div class="stat-sub">Together 0.87 vs Apart 0.68</div></div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title">Preprocessing Pipeline &amp; Model Configuration</div>
+    <div class="grid-2" style="margin-bottom:0">
+      <div>
+        <table class="data-table">
+          <tr><th>Step</th><th>Method</th></tr>
+          <tr><td>Categorical encoding</td><td class="mono">LabelEncoder</td></tr>
+          <tr><td>Train/test split</td><td class="mono">80/20 (random_state=42)</td></tr>
+          <tr><td>Scaling</td><td class="mono">StandardScaler (fit on train)</td></tr>
+          <tr><td>Setting</td><td class="mono">Regression (continuous G3)</td></tr>
+          <tr><td>Tuning</td><td class="mono">GridSearchCV (cv=3, neg MSE)</td></tr>
+        </table>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px">Decision Tree Regressor</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.5">Non-linear partitions, interpretable rules. Risk: high variance / overfitting.</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px">XGBoost Regressor</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5">Gradient boosting of trees. Objective: reg:squarederror. Strong bias-variance trade-off.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Performance Across All Models</div>
+      <table class="data-table">
+        <tr><th>Model</th><th>Dataset</th><th>MAE</th><th>RMSE</th><th>R&sup2;</th></tr>
+        <tr><td>Decision Tree</td><td>mat</td><td class="mono">1.30</td><td class="mono">2.31</td><td class="mono">0.74</td></tr>
+        <tr><td>XGBoost</td><td>mat</td><td class="mono">1.17</td><td class="mono">1.93</td><td class="mono">0.82</td></tr>
+        <tr><td>Decision Tree</td><td>por</td><td class="mono">0.70</td><td class="mono">1.38</td><td class="mono">0.80</td></tr>
+        <tr><td>XGBoost</td><td>por</td><td class="mono">0.75</td><td class="mono">1.24</td><td class="mono">0.84</td></tr>
+        <tr><td>Decision Tree</td><td>merged</td><td class="mono">1.08</td><td class="mono">1.71</td><td class="mono">0.87</td></tr>
+        <tr><td style="color:var(--teal);font-weight:600">XGBoost</td><td style="color:var(--teal);font-weight:600">merged</td><td class="mono" style="color:var(--teal)">0.85</td><td class="mono" style="color:var(--teal)">1.37</td><td class="mono" style="color:var(--teal);font-weight:700">0.92</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Fairness Evaluation &mdash; Group-wise MAE</div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--red)">Gender (sex) &mdash; &Delta; = 0.35</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span style="width:60px;font-size:11px;color:var(--text-muted)">Female</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill red" style="width:97%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.97</div></div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="width:60px;font-size:11px;color:var(--text-muted)">Male</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill green" style="width:62%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.62</div></div></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--orange)">Address &mdash; &Delta; = 0.23</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span style="width:60px;font-size:11px;color:var(--text-muted)">Rural</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill orange" style="width:99%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.99</div></div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="width:60px;font-size:11px;color:var(--text-muted)">Urban</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill teal" style="width:76%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.76</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--orange)">Family Status (Pstatus) &mdash; &Delta; = 0.19</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span style="width:60px;font-size:11px;color:var(--text-muted)">Together</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill orange" style="width:87%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.87</div></div></div>
+        <div style="display:flex;gap:8px;align-items:center"><span style="width:60px;font-size:11px;color:var(--text-muted)">Apart</span><div class="progress-track" style="flex:1;height:16px"><div class="progress-fill teal" style="width:68%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:var(--mono)">0.68</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Key Insights</div>
+    <div class="field-card"><div class="field-badge badge-info">INSIGHT</div><div class="field-name">Data distribution: Urban mean G3 ~11.43 vs Rural ~9.00 &mdash; part of disparity is data-driven, not only model-induced</div></div>
+    <div class="field-card"><div class="field-badge badge-high">WARNING</div><div class="field-name">Bias patterns are NOT identical across mat, por, and merged &mdash; fairness is context-dependent</div></div>
+    <div class="field-card"><div class="field-badge badge-high">WARNING</div><div class="field-name">Merged dataset improves accuracy (R&sup2;: 0.87 &rarr; 0.92) but does NOT remove disparities (may amplify)</div></div>
+    <div class="field-card"><div class="field-badge badge-critical">CRITICAL</div><div class="field-name">A model can be accurate (high R&sup2;) while exhibiting disparate errors across groups</div></div>
+  </div>
+</div>
+
+<!-- ── Edu: Regulatory Mapping ── -->
+<div class="main fade-in hidden" id="edu-mapping">
+  <div class="section-title">Compliance Pipeline Overview</div>
+  <div class="panel mb-16">
+    <div class="grid-3" style="margin-bottom:0">
+      <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px">Step 1 &mdash; Profiling</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5">Identify direct identifiers, quasi-identifiers, sensitive attributes, non-relevant features, temporal scope, risk tags. Output: <span style="font-family:var(--mono);font-size:10px">profile.json</span></div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px">Step 2 &mdash; Checklist Generation</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5">LLM generates 9-11 data-driven compliance questions per QI category, grounded in FERPA + NIST AI RMF. Output: <span style="font-family:var(--mono);font-size:10px">compliance_checklist.json</span></div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px">Step 3 &mdash; Evaluation &amp; Scoring</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.5">LLM answers each question via RAG with regulatory justification. Weighted scoring: FERPA &times;3, NIST &times;2, Generic &times;1. Output: <span style="font-family:var(--mono);font-size:10px">compliance_report.json</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">QI Category &rarr; Column Mapping (student-mat)</div>
+  <div class="panel mb-16">
+    <table class="data-table">
+      <tr><th>Category</th><th>Columns</th></tr>
+      <tr><td>Age / Date of Birth</td><td class="mono">age</td></tr>
+      <tr><td>Sex / Gender</td><td class="mono">sex</td></tr>
+      <tr><td>Geographic Indicators</td><td class="mono">address</td></tr>
+      <tr><td>School / Institution Identifier</td><td class="mono">school</td></tr>
+      <tr><td>Family Structure &amp; Guardian</td><td class="mono">famsize, Pstatus, guardian</td></tr>
+      <tr><td>Parental Education &amp; Occupation</td><td class="mono">Medu, Fedu, Mjob, Fjob</td></tr>
+      <tr><td>Academic Performance Indicators</td><td class="mono">G1, G2, failures, absences</td></tr>
+      <tr><td>Behavioral / Attendance Indicators</td><td class="mono">studytime, Dalc, Walc, goout, freetime, activities, romantic</td></tr>
+      <tr><td>Socioeconomic Indicators</td><td class="mono">internet, paid, higher, nursery</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Quasi-Identifier &rarr; FERPA / NIST AI RMF Mapping</div>
+  <div class="panel mb-16">
+    <table class="data-table">
+      <tr><th>Quasi-Identifier</th><th>Risk Tags</th><th>Regulations</th><th>Specific Concern</th></tr>
+      <tr><td>Age / Date of Birth</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA, NIST MAP 2.3</td><td>All subjects are minors. Age + school + address narrows identification space. Compliance 10.9-23.0%. Enhanced protections triggered.</td></tr>
+      <tr><td>Sex / Gender</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA, NIST MAP 2.3, MEASURE 2.6</td><td>Gender enables profiling of minors. Variable compliance (10.9% mat vs 86.2% por). Model shows largest fairness gap (&Delta;=0.35).</td></tr>
+      <tr><td>Geographic (address)</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA (directory info), NIST</td><td>Urban/rural + school narrows to small populations. Model shows geographic bias (&Delta;=0.23). Rural students disadvantaged.</td></tr>
+      <tr><td>School / Institution</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA (directory info)</td><td>Directly localizes students geographically and socially. Low compliance (25-41%). + age + gender = drastically reduced anonymity.</td></tr>
+      <tr><td>Family Structure</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA, NIST AI RMF</td><td>Family size, Pstatus, guardian reveal sensitive circumstances. Model bias on Pstatus (&Delta;=0.19). Ethical concerns about using as predictor.</td></tr>
+      <tr><td>Parental Education</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">FERPA</td><td>Parental occupation/education infer socioeconomic status and family vulnerability. Act as socioeconomic proxies in model. 71-79% compliance.</td></tr>
+      <tr><td>Academic Performance</td><td><span class="field-badge badge-high" style="font-size:9px">edu_records_sensitive</span></td><td class="mono">FERPA (core records)</td><td>G1, G2, failures, absences are core FERPA-protected records. Lowest compliance (21.6-34.2%). Closely related to target G3 = accuracy vs protection tension.</td></tr>
+      <tr><td>Behavioral / Attendance</td><td><span class="field-badge badge-high" style="font-size:9px">edu_records_sensitive</span></td><td class="mono">FERPA, NIST AI RMF</td><td>Alcohol (Dalc, Walc), social activities, romantic relationships especially sensitive for minors. 100% compliance but ethical questions about using for prediction.</td></tr>
+      <tr><td>Socioeconomic</td><td><span class="field-badge badge-critical" style="font-size:9px">reidentification</span></td><td class="mono">NIST AI RMF</td><td>Internet, paid activities, nursery infer economic status. Variable compliance (67-93%). Can serve as proxy variables for discrimination.</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Model Risk &rarr; NIST AI RMF Mapping</div>
+  <div class="panel mb-16">
+    <table class="data-table">
+      <tr><th>Model Risk</th><th>Finding</th><th>NIST Function</th><th>Obligation</th></tr>
+      <tr><td>Disparate performance</td><td>Gender &Delta;=0.35, Geographic &Delta;=0.23</td><td class="mono">MAP 2.3</td><td>Identify and document fairness-related impacts. Gender gap exceeds typical 0.2-0.3 threshold.</td></tr>
+      <tr><td>Fairness across contexts</td><td>Bias patterns differ across mat, por, merged</td><td class="mono">MEASURE 2.6</td><td>Measure performance disparities across demographic groups. Validate in each deployment context.</td></tr>
+      <tr><td>Data-driven vs model bias</td><td>Urban G3~11.43 vs Rural G3~9.00</td><td class="mono">MAP 1.5</td><td>Distinguish data biases from model biases. Determine if model should reproduce or mitigate data-level disparities.</td></tr>
+      <tr><td>Accuracy-fairness trade-off</td><td>Merged: best R&sup2;=0.92 but gaps persist/amplify</td><td class="mono">GOVERN 1.2</td><td>High R&sup2; does not guarantee equitable outcomes. Accurate model can have disparate errors across groups.</td></tr>
+      <tr><td>Minor protection</td><td>All subjects are secondary school minors</td><td class="mono">MAP 2.3, GOVERN 1.1</td><td>AI affecting minors requires heightened scrutiny. Predictions impact educational trajectories.</td></tr>
+      <tr><td>Transparency</td><td>No model docs for teachers, administrators, parents</td><td class="mono">MAP 3.5</td><td>Provide documentation of limitations, biases, intended use. Predictions are not deterministic.</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Compliance Themes (Generated by LLM)</div>
+  <div class="panel">
+    <div class="field-card"><div class="field-badge badge-critical">THEME</div><div class="field-name"><strong>Identification &amp; re-identification</strong> &mdash; Direct Identifier Protection, Re-identification Risk, Linkability Risk</div></div>
+    <div class="field-card"><div class="field-badge badge-high">THEME</div><div class="field-name"><strong>Fairness &amp; bias</strong> &mdash; Representation Bias, Algorithmic Fairness, Protected Attribute Handling, Historical Bias Detection</div></div>
+    <div class="field-card"><div class="field-badge badge-info">THEME</div><div class="field-name"><strong>Data quality</strong> &mdash; Data Completeness, Outlier Detection, Data Integrity</div></div>
+    <div class="field-card"><div class="field-badge badge-info">THEME</div><div class="field-name"><strong>Structural privacy</strong> &mdash; Data Minimization, Data Granularity Control, Statistical Disclosure Control</div></div>
+    <div class="field-card"><div class="field-badge badge-info">THEME</div><div class="field-name"><strong>Context &amp; purpose</strong> &mdash; Data Decontextualization, Purpose Limitation, Temporal Validity</div></div>
+    <div class="field-card"><div class="field-badge badge-medium">THEME</div><div class="field-name"><strong>Domain-specific (FERPA)</strong> &mdash; Education Records Scope, Legitimate Educational Interest, Directory Information Classification, Minor Protection</div></div>
+  </div>
+</div>
+
+<!-- ── Edu: Guidance ── -->
+<div class="main fade-in hidden" id="edu-guidance">
+  <div class="section-title">FERPA Compliance Guidance</div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title immediate" style="margin:0">Priority 1 &mdash; Critical (Immediate)</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Education Records Protection</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> Academic performance indicators (G1, G2, failures, absences) have 21.6-34.2% compliance despite being core FERPA-protected records.</div>
+      <div class="field-card"><div class="field-name">Ensure all education records are handled under FERPA's consent requirements</div></div>
+      <div class="field-card"><div class="field-name">Document legitimate educational interest for each data use</div></div>
+      <div class="field-card"><div class="field-name">Implement access controls limiting who can view individual student records</div></div>
+      <div class="field-card"><div class="field-name">Apply de-identification standards per FERPA's de-identification guidance</div></div>
+      <div class="field-card"><div class="field-name">If shared for research: ensure a data use agreement is in place</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Minor Protection</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> All subjects are minors. Sensitive behavioral data (alcohol Dalc/Walc, goout, romantic) used for prediction.</div>
+      <div class="field-card"><div class="field-name">Obtain parental consent where required under FERPA</div></div>
+      <div class="field-card"><div class="field-name">Apply enhanced data minimization for behavioral data of minors</div></div>
+      <div class="field-card"><div class="field-name">Ensure prediction system does not create adverse effects for vulnerable students</div></div>
+      <div class="field-card"><div class="field-name">Consider excluding behavioral variables (alcohol, romance) from models for minors</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Re-identification Risk Mitigation</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> 9 QI categories create non-negligible re-identification risk, especially in small schools.</div>
+      <div class="field-card"><div class="field-name">Apply FERPA de-identification: remove all 18 FERPA identifiers OR expert determination</div></div>
+      <div class="field-card"><div class="field-name">Implement k-anonymity (each record indistinguishable from k-1 others)</div></div>
+      <div class="field-card"><div class="field-name">Suppress or generalize school identifiers in released datasets</div></div>
+      <div class="field-card"><div class="field-name">Aggregate geographic indicators to prevent identification in small communities</div></div>
+      <div class="field-card"><div class="field-name">Note: school + age + sex + family size may uniquely identify students in small institutions</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title short" style="margin:0">Priority 2 &mdash; High</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Directory Information Classification</div>
+      <div class="field-card"><div class="field-name">Classify which variables = directory info vs education records. Apply appropriate rules. Document opt-out mechanisms.</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Data Minimization</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> 21 sensitive columns across 5 categories. Not all necessary for grade prediction.</div>
+      <div class="field-card"><div class="field-name">Conduct feature relevance analysis to identify non-essential variables</div></div>
+      <div class="field-card"><div class="field-name">Remove variables with low predictive value + high sensitivity (e.g., romantic, Walc)</div></div>
+      <div class="field-card"><div class="field-name">Document necessity justification for each retained sensitive variable</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-24">
+    <div class="panel-title"><span class="phase-title medium" style="margin:0">Priority 3 &mdash; Medium</span></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Transparency &amp; Notification</div>
+    <div class="field-card"><div class="field-name">Provide annual FERPA notification to parents/eligible students about data collection</div></div>
+    <div class="field-card"><div class="field-name">Document purpose and scope of data processing for prediction</div></div>
+    <div class="field-card"><div class="field-name">Inform stakeholders about the predictive model's existence, nature, and limitations</div></div>
+    <div class="field-card"><div class="field-name">Establish process for parents to request correction or deletion of records</div></div>
+  </div>
+
+  <div class="section-title">NIST AI RMF Compliance Guidance</div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title immediate" style="margin:0">Priority 1 &mdash; Critical</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">GOVERN 1.1 / 1.2 &mdash; Trustworthy AI Governance</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px"><em>Finding:</em> Documented fairness gaps (&Delta;=0.35 gender, &Delta;=0.23 geography, &Delta;=0.19 family) but no governance framework.</div>
+      <div class="field-card"><div class="field-name">Establish AI governance policies specific to educational AI</div></div>
+      <div class="field-card"><div class="field-name">Define acceptable fairness thresholds (recommended: &Delta; MAE &lt; 0.2)</div></div>
+      <div class="field-card"><div class="field-name">Document organizational risk tolerance for AI affecting minors</div></div>
+      <div class="field-card"><div class="field-name">Assign accountability for fairness monitoring</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">MAP 2.3 &mdash; Bias Identification &amp; Mitigation</div>
+      <div class="field-card"><div class="field-name">Pre-processing: rebalancing/reweighting training data by sensitive groups</div></div>
+      <div class="field-card"><div class="field-name">In-processing: fairness constraints during training (fairness-aware XGBoost)</div></div>
+      <div class="field-card"><div class="field-name">Post-processing: calibration to equalize error rates across groups</div></div>
+      <div class="field-card"><div class="field-name">Remove or control sensitive features (e.g., sex) and their proxies</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">MEASURE 2.6 &mdash; Fairness Evaluation</div>
+      <div class="field-card"><div class="field-name">Evaluate fairness across ALL relevant subgroups before deployment</div></div>
+      <div class="field-card"><div class="field-name">Test on each dataset variant separately (mat, por, merged)</div></div>
+      <div class="field-card"><div class="field-name">Define alert thresholds (flag if &Delta; MAE &gt; 0.2-0.3)</div></div>
+      <div class="field-card"><div class="field-name">Repeat fairness evaluation when model is retrained or deployed in new context</div></div>
+    </div>
+  </div>
+
+  <div class="panel mb-16">
+    <div class="panel-title"><span class="phase-title short" style="margin:0">Priority 2 &mdash; High</span></div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">MAP 1.5 &mdash; Context &amp; Risk Characterization</div>
+      <div class="field-card"><div class="field-name">Separate data bias from model bias (Urban G3~11.43 vs Rural G3~9.00)</div></div>
+      <div class="field-card"><div class="field-name">Determine if model should reproduce, mitigate, or be neutral to data-level disparities</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">MAP 3.5 &mdash; Transparency &amp; Documentation</div>
+      <div class="field-card"><div class="field-name">Create model card: intended use, limitations, known biases, per-subgroup performance</div></div>
+      <div class="field-card"><div class="field-name">Document that system is not a substitute for educator judgment</div></div>
+      <div class="field-card"><div class="field-name">Communicate that predictions are less reliable for certain subgroups (females, rural)</div></div>
+      <div class="field-card"><div class="field-name">Include confidence intervals or uncertainty estimates with predictions</div></div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">MEASURE 2.7 &mdash; Robustness &amp; Reliability</div>
+      <div class="field-card"><div class="field-name">Test robustness across different populations and academic years</div></div>
+      <div class="field-card"><div class="field-name">Implement drift detection + retraining schedule</div></div>
+      <div class="field-card"><div class="field-name">Consider ensemble methods or model averaging to improve stability</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title"><span class="phase-title medium" style="margin:0">Priority 3 &mdash; Medium</span></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">GOVERN 6 &mdash; Stakeholder Engagement</div>
+    <div class="field-card"><div class="field-name">Involve educators, parents, and student representatives in AI system design</div></div>
+    <div class="field-card"><div class="field-name">Establish feedback mechanisms for reporting concerns about predictions</div></div>
+    <div class="field-card"><div class="field-name">Ensure human-in-the-loop: educators review and can override AI recommendations</div></div>
+    <div class="field-card"><div class="field-name">Conduct impact assessment on how predictions affect student outcomes and resource allocation</div></div>
+  </div>
+</div>
+
+<!-- ── Edu: Compounding Risks ── -->
+<div class="main fade-in hidden" id="edu-risks">
+  <div class="section-title">Cross-Domain Compounding Risks &mdash; FERPA &times; NIST AI RMF</div>
+
+  <div class="risk-row"><div class="risk-severity critical"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-critical">CRITICAL</span> Gender Equity Paradox</div><div class="risk-desc">Sex/Gender has lowest compliance in student-mat (10.9%) with reidentification_risk. Model shows largest fairness gap on gender (&Delta;=0.35) &mdash; females systematically disadvantaged. Privacy-sensitive gender data is inadequately protected AND drives the largest model disparity.</div><div class="risk-regs">FERPA &times; NIST MAP 2.3</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity critical"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-critical">CRITICAL</span> Minor Vulnerability Amplification</div><div class="risk-desc">All subjects are minors with enhanced legal protections required. 21 sensitive columns including behavioral data (alcohol, social activities). Model trained on sensitive behavioral data of minors to predict academic outcomes with documented fairness gaps.</div><div class="risk-regs">FERPA &times; NIST GOVERN 1.1</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Geographic Discrimination</div><div class="risk-desc">Address is a quasi-identifier enabling re-identification (especially in small rural schools). Rural students experience 30% higher prediction error (MAE 0.99 vs 0.76). Geographic data narrows identification AND drives predictive disadvantage.</div><div class="risk-regs">FERPA (directory info) &times; NIST MEASURE 2.6</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Socioeconomic Proxy Risk</div><div class="risk-desc">Family structure, parental education, and socioeconomic indicators are quasi-identifiers. Family status (Pstatus) drives model bias (&Delta;=0.19). Students from different socioeconomic backgrounds receive predictions of unequal reliability.</div><div class="risk-regs">FERPA &times; NIST MAP 2.3</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Cross-Dataset Instability</div><div class="risk-desc">Both datasets share same structure but show different compliance patterns (Sex/Gender: 10.9% vs 86.2%). Bias patterns are not identical across mat, por, merged. Neither compliance nor fairness generalizes reliably across academic contexts.</div><div class="risk-regs">NIST MEASURE 2.6 &times; NIST MAP 1.5</div></div></div>
+
+  <div class="risk-row"><div class="risk-severity high"></div><div class="risk-content"><div class="risk-title"><span class="field-badge badge-high">HIGH</span> Education Records Exploitation</div><div class="risk-desc">Academic performance indicators (G1, G2, failures) have very low compliance (21.6-34.2%) despite being core FERPA-protected records. G1 and G2 are among the most predictive features for G3. Maximizing accuracy requires heavy reliance on the weakest compliance variables.</div><div class="risk-regs">FERPA &times; NIST GOVERN 1.2</div></div></div>
+</div>
+
+<!-- ── Edu: Roadmap ── -->
+<div class="main fade-in hidden" id="edu-roadmap">
+  <div class="section-title">Risk Mitigation Roadmap &mdash; Education</div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title immediate">Immediate &mdash; Before Deployment</div>
+    <div class="roadmap-item"><div class="roadmap-num">1</div><div class="roadmap-text"><strong>Apply FERPA de-identification to all released datasets</strong><div class="roadmap-reg">FERPA &mdash; Re-identification risk across 9 QI categories</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">2</div><div class="roadmap-text"><strong>Implement fairness-aware debiasing (gender &Delta;=0.35, address &Delta;=0.23)</strong><div class="roadmap-reg">NIST MAP 2.3 &mdash; Disparate performance exceeding thresholds</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">3</div><div class="roadmap-text"><strong>Document educational interest and obtain consent for minor data use</strong><div class="roadmap-reg">FERPA &mdash; Sensitive behavioral data of minors without safeguards</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">4</div><div class="roadmap-text"><strong>Define fairness thresholds and establish AI governance framework</strong><div class="roadmap-reg">NIST GOVERN 1.1/1.2 &mdash; No governance for AI affecting minors</div></div></div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title short">Short-Term &mdash; 0-3 Months</div>
+    <div class="roadmap-item"><div class="roadmap-num">5</div><div class="roadmap-text"><strong>Implement k-anonymity for quasi-identifier combinations</strong><div class="roadmap-reg">FERPA &mdash; Re-identification risk in small schools</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">6</div><div class="roadmap-text"><strong>Create model card with limitations, biases, per-subgroup metrics</strong><div class="roadmap-reg">NIST MAP 3.5 &mdash; No transparency documentation</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">7</div><div class="roadmap-text"><strong>Validate fairness independently on mat, por, and merged datasets</strong><div class="roadmap-reg">NIST MEASURE 2.6 &mdash; Cross-dataset fairness instability</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">8</div><div class="roadmap-text"><strong>Establish human-in-the-loop: educators review and override predictions</strong><div class="roadmap-reg">NIST GOVERN 6 &mdash; No educator oversight</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">9</div><div class="roadmap-text"><strong>Classify variables as directory information vs education records</strong><div class="roadmap-reg">FERPA &mdash; Directory information handling (25-41% compliance)</div></div></div>
+  </div>
+
+  <div class="roadmap-phase">
+    <div class="phase-title medium">Medium-Term &mdash; 3-6 Months</div>
+    <div class="roadmap-item"><div class="roadmap-num">10</div><div class="roadmap-text"><strong>Remove or control low-utility sensitive features (alcohol, romance)</strong><div class="roadmap-reg">FERPA &mdash; Data minimization for minors' behavioral data</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">11</div><div class="roadmap-text"><strong>Implement continuous fairness monitoring with alerts (&Delta;MAE > 0.2)</strong><div class="roadmap-reg">NIST MEASURE 2.6 &mdash; Bias drift over time</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">12</div><div class="roadmap-text"><strong>Test robustness across new student cohorts and academic years</strong><div class="roadmap-reg">NIST MEASURE 2.7 &mdash; Performance instability (R&sup2; 0.74-0.92)</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">13</div><div class="roadmap-text"><strong>Engage educators, parents, and students in system governance</strong><div class="roadmap-reg">NIST GOVERN 6 &mdash; No stakeholder involvement</div></div></div>
+    <div class="roadmap-item"><div class="roadmap-num">14</div><div class="roadmap-text"><strong>Conduct impact assessment on prediction effects on student outcomes</strong><div class="roadmap-reg">NIST MAP 1.5 &mdash; Unknown downstream effects on equity</div></div></div>
+  </div>
+</div>
+
+</div><!-- /domain-edu -->
+
+
+<script>
+function switchDomain(d){
+  document.getElementById('domain-health').classList.toggle('hidden',d!=='health');
+  document.getElementById('domain-edu').classList.toggle('hidden',d!=='edu');
+  document.getElementById('tab-health').className='domain-tab'+(d==='health'?' active-health':'');
+  document.getElementById('tab-edu').className='domain-tab'+(d==='edu'?' active-edu':'');
+  // Reset sub-tabs
+  if(d==='health') switchSub('health','overview');
+  if(d==='edu') switchSub('edu','overview');
+}
+function switchSub(domain,view){
+  var prefix=domain==='health'?'health':'edu';
+  var views=['overview','data','model','mapping','risks','guidance','roadmap'];
+  views.forEach(function(v){
+    var el=document.getElementById(prefix+'-'+v);
+    if(el) el.classList.toggle('hidden',v!==view);
+  });
+  var nav=document.getElementById('subnav-'+prefix);
+  var tabs=nav.querySelectorAll('.subnav-tab');
+  tabs.forEach(function(t,i){t.classList.toggle('active',views[i]===view)});
+}
+</script>
+</body>
+</html>
