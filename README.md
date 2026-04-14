@@ -3,9 +3,9 @@
 AICoRe is a web-based compliance auditing platform that integrates multi-framework model compliance assessment, SHAP-based explainability, and automated regulatory report generation in a single reproducible pipeline. 
 
 ---
-### Authors:  Nafissatou Ndiaye, Johanna Fokui, Julie Abouem, Diarra Gningue, Mounina Toure, Anuradha Kar
-### Affiliation: aivancity School of AI & Data for Business & Society, Paris Campus, Villejuif, 94800, France
-### Corresponding author, email: kar@aivancity.ai
+### * Authors: Nafissatou Ndiaye, Johanna Fokui, Julie Abouem, Diarra Gningue, Mounina Toure, Anuradha Kar
+### * Affiliation: aivancity School of AI & Data for Business & Society, Paris Campus, Villejuif, 94800, France
+### * Corresponding author email: kar@aivancity.ai
 
 ## Repository structure
 
