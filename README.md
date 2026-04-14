@@ -1,4 +1,4 @@
-# AICoRe-  AnExtensible Auditing Tool for High-Risk AI
+# AICoRe-  An Extensible Auditing Tool for High-Risk AI
 
 AICoRe is a web-based compliance auditing platform that integrates multi-framework model compliance assessment, SHAP-based explainability, and automated regulatory report generation in a single reproducible pipeline. 
 
