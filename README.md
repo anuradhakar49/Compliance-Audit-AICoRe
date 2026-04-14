@@ -23,7 +23,7 @@ AICoRe/
 │
 ├── dashboard/                   ← Interactive compliance dashboard
 │   ├── README.md
-│   └── Compliance_Dashboard.html
+│   └── AICoRe_Compliance_Dashboard.html
 │
 └── datasets/                    ← Benchmark datasets used for evaluation
     ├── README.md
@@ -33,9 +33,7 @@ AICoRe/
 
 ---
 
-## Overview
-
-The tool addresses a critical gap in the existing AI compliance landscape: no open-source tool integrates all of the following in a single pipeline.
+## Overview of capabilities
 
 | Capability | TrustworthyAudit | IBM AIF360 | MS Fairlearn | Credo AI |
 |---|---|---|---|---|
@@ -55,19 +53,7 @@ The tool addresses a critical gap in the existing AI compliance landscape: no op
 | EU AI Act (2024/1689) | Risk classification · Annex III · Arts 9–16 | Binding · EU |
 | GDPR | Arts 5, 6, 9, 22, 25, 35 | Binding · EU |
 | NIST AI RMF | Govern · Map · Measure · Manage | Voluntary · US |
-| FERPA / COPPA | Education and child data | Binding · US sectoral |
-
-## Requirements
-
-```bash
-Python >= 3.9
-scikit-learn >= 1.3
-pandas >= 1.5
-numpy >= 1.23
-shap >= 0.42
-matplotlib >= 3.6
-seaborn >= 0.12
-```
+| FERPA  | Education and child data | Binding · US sectoral |
 
 ## License
 
